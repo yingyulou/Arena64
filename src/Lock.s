@@ -1,18 +1,20 @@
 [bits 64]
 [default rel]
 
-extern lockInit
-extern lockAcquire
-extern lockRelease
+global lockInit
+global lockAcquire
+global lockRelease
 
 lockInit:
 
     mov qword [rdi], 0x0
+    mov qword [rdi + 0x8], 0x0
 
     ret
 
 lockAcquire:
 
+    push rax
     push rdx
 
     mov rdx, 0x1
@@ -24,10 +26,11 @@ lockAcquire:
     jne .__tryLock
 
     pushf
-    pop rax
+    pop qword [rdi + 0x8]
     cli
 
     pop rdx
+    pop rax
 
     ret
 
@@ -35,7 +38,7 @@ lockRelease:
 
     mov qword [rdi], 0x0
 
-    push rsi
+    push qword [rdi + 0x8]
     popf
 
     ret

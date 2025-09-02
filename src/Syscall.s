@@ -42,23 +42,23 @@ syscallInit:
 
 syscallHandle:
 
-    mov [gs: 104], rsp
+    mov [gs: 112], rsp
     mov rsp, [gs: 4]
 
     push rcx
     push r11
 
-    mov rcx, syscallList
+    mov rcx, __syscallList
     call [rcx + rax * 8]
 
     pop r11
     pop rcx
 
-    mov rsp, [gs: 104]
+    mov rsp, [gs: 112]
 
     o64 sysret
 
-syscallList:
+__syscallList:
     dq printStr
     dq inputStr
     dq taskExit

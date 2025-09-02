@@ -3,16 +3,16 @@
 #include "Bitmap.h"
 #include "Util.h"
 
-void bitmapInit(Bitmap *this, uint8_t *buf, uint64_t size)
+void bitmapInit(Bitmap *this, uint8_t *data, uint64_t size)
 {
-    this->__buf  = buf;
+    this->__data = data;
     this->__size = size;
 }
 
 
 bool bitmapGet(Bitmap *this, uint64_t idx)
 {
-    return (this->__buf[idx >> 3] >> (idx & 7)) & 1;
+    return (this->__data[idx >> 3] >> (idx & 0x7)) & 0x1;
 }
 
 
@@ -20,11 +20,11 @@ void bitmapSet(Bitmap *this, uint64_t idx, bool val)
 {
     if (val)
     {
-        this->__buf[idx >> 3] |= 1 << (idx & 7);
+        this->__data[idx >> 3] |= 0x1 << (idx & 0x7);
     }
     else
     {
-        this->__buf[idx >> 3] &= ~(1 << (idx & 7));
+        this->__data[idx >> 3] &= ~(0x1 << (idx & 0x7));
     }
 }
 

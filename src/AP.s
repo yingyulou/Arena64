@@ -1,9 +1,11 @@
+%include "Boot.inc"
+
 [bits 64]
 [default rel]
 
 extern hdRead
-extern taskQueue
 extern syscallInit
+extern apStack
 
 global apInit
 
@@ -15,24 +17,24 @@ apInit:
     push rsi
     push rdi
 
-    sgdt [abs 0x7e00]
-    sidt [abs 0x7e10]
-    mov rdx, apBoot64
-    mov [abs 0x7e20], rdx
-
-    mov rdi, 0x8000
+    mov rdi, __BOOT_ADDR
     mov rsi, 1
     mov rdx, 1
     call hdRead
 
+    sgdt [abs __BOOT_ADDR + 0x8]
+    sidt [abs __BOOT_ADDR + 0x18]
+    mov rdx, apBoot64
+    mov [abs __BOOT_ADDR + 0x28], rdx
+
     mov rdi, 0xffff8000fee00300
     mov dword [rdi], 0x000c4500
     db 0xeb, 0x0
-    mov dword [rdi], 0x000c4608
+    mov dword [rdi], 0x000c4600 | (__BOOT_ADDR >> 12)
 
 .__waitAP:
 
-    cmp qword [apInitFlag], __CPU_COUNT
+    cmp dword [apInitFlag], __CPU_COUNT
     jne .__waitAP
 
     pop rdi
@@ -43,17 +45,17 @@ apInit:
 
 apBoot64:
 
-    lgdt [abs 0x7e00]
-    lidt [abs 0x7e10]
+    lgdt [abs __BOOT_ADDR + 0x8]
+    lidt [abs __BOOT_ADDR + 0x18]
 
     mov r8, 0xffff8000fee00020
     mov r8d, [r8]
     shr r8, 24
 
-    mov r9, 0xffff8000000a0000
-    lea rax, [r8 + 1]
+    mov r9, apStack
+    lea rax, [r8 - 1]
     shl rax, 12
-    sub r9, rax
+    add r9, rax
 
     lea rsp, [r9 + 0x1000]
 
@@ -74,21 +76,14 @@ apBoot64:
     ltr ax
 
     mov ecx, 0xc0000101
-    mov rax, r8
-    shl rax, 7
-    mov rdx, 0xffff800000092000
-    add rax, rdx
+    lea rax, [r9 + 0x38]
     mov rdx, rax
     shr rdx, 32
     wrmsr
 
-    mov qword [r9 + 0x10], 0x100000
-    mov rax, taskQueue
-    mov [r9 + 0x20], rax
-
     call syscallInit
 
-    lock inc qword [apInitFlag]
+    lock inc dword [apInitFlag]
 
     sti
 
@@ -98,4 +93,4 @@ apBoot64:
     jmp .__idle
 
 apInitFlag:
-    dq 0x1
+    dd 0x1

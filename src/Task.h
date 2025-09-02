@@ -1,23 +1,30 @@
 #pragma once
 
 #include "Bitmap.h"
-#include "Queue.h"
 #include "Util.h"
+
+#define __TASK_READY ((uint64_t)0x0)
+#define __TASK_EXIT  ((uint64_t)0x1)
+#define __TASK_BLOCK ((uint64_t)0x2)
 
 typedef struct
 {
-    Node __tcbNode;
+    Node _;
     uint64_t __CR3;
     uint64_t __RSP0;
-    Queue *__taskQueue;
+    uint64_t __taskState;
     Bitmap __vBitmap;
+    uint8_t __TSS[104];
+    uint64_t __idleTask;
+    uint64_t __RSP3;
 } TCB;
 
-extern Queue taskQueue, exitQueue;
+
+extern uint8_t apStack[];
 
 void taskInit();
-TCB *getTCB();
 void loadTaskPL0(void *RIP);
 void loadTaskPL3(uint32_t startSector, uint8_t sectorCount);
-void deleteTask();
+TCB *getCurTask();
+TCB *getNextTask();
 void taskExit();

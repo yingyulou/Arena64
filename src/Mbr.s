@@ -1,4 +1,17 @@
-section Mbr vstart=0x7c00
+%include "Boot.inc"
+
+section Mbr
+
+    mov ax, __BOOT_SEG
+    mov es, ax
+    mov si, 0x7c00
+    xor di, di
+    mov cx, 256
+    rep movsw
+    mov ds, ax
+    jmp __BOOT_SEG:.__bootStart
+
+.__bootStart:
 
     lgdt [GDTR]
 
@@ -10,7 +23,7 @@ section Mbr vstart=0x7c00
     bts eax, 0
     mov cr0, eax
 
-    jmp (1 << 3):.__protectMode
+    jmp dword (1 << 3):.__protectMode + __BOOT_ADDR
 
 [bits 32]
 
@@ -70,13 +83,13 @@ section Mbr vstart=0x7c00
     bts eax, 31
     mov cr0, eax
 
-    jmp (3 << 3):.__x64Mode
+    jmp (3 << 3):.__x64Mode + __BOOT_ADDR
 
 [bits 64]
 
 .__x64Mode:
 
-    lgdt [GDTR]
+    lgdt [GDTR + __BOOT_ADDR]
 
     mov rsp, 0xffff8000000a0000
 
@@ -112,13 +125,13 @@ section Mbr vstart=0x7c00
 
     mov dx, 0x1f0
     mov rdi, 0x80000
-    mov rcx, 96 * 256
+    mov rcx, 96 * 512 / 2
     rep insw
 
     mov rbx, [0x80020]
     add rbx, 0x80000
-    movzx rcx, word [0x80038]
     movzx rdx, word [0x80036]
+    movzx rcx, word [0x80038]
 
 .__parseELF:
 
@@ -131,7 +144,7 @@ section Mbr vstart=0x7c00
     push rcx
     mov rcx, [rbx + 0x20]
     rep movsb
-    xor rax, rax
+    xor al, al
     mov rcx, [rbx + 0x28]
     sub rcx, [rbx + 0x20]
     rep stosb
@@ -144,22 +157,16 @@ section Mbr vstart=0x7c00
 
     jmp [0x80018]
 
+align 0x8
 GDT:
     dq 0x0
     dq 0x00cf98000000ffff
     dq 0x00cf92000000ffff
     dq 0x0020980000000000
-    dq 0x0020920000000000
-    dq 0x0020f20000000000
-    dq 0x0020f80000000000
-    dq 0x0000890920000067, 0x00000000ffff8000
-    dq 0x0000890920800067, 0x00000000ffff8000
-    dq 0x0000890921000067, 0x00000000ffff8000
-    dq 0x0000890921800067, 0x00000000ffff8000
 
 GDTR:
     dw $ - GDT - 1
-    dd GDT
+    dd GDT + __BOOT_ADDR
     dd 0xffff8000
 
 times 510 - ($ - $$) db 0x0

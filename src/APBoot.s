@@ -1,6 +1,26 @@
-section APBoot vstart=0x8000
+%include "Boot.inc"
 
-    lgdt [0x7e00]
+section APBoot
+
+    jmp .__bootStart
+
+align 0x8
+GDTR:
+    dq 0x0, 0x0
+
+IDTR:
+    dq 0x0, 0x0
+
+apBoot64:
+    dq 0x0
+
+.__bootStart:
+
+    mov ax, __BOOT_SEG
+    mov ds, ax
+    mov es, ax
+
+    lgdt [GDTR]
 
     in al, 0x92
     or al, 0x2
@@ -10,7 +30,7 @@ section APBoot vstart=0x8000
     bts eax, 0
     mov cr0, eax
 
-    jmp (1 << 3):.__protectMode
+    jmp dword (1 << 3):.__protectMode + __BOOT_ADDR
 
 [bits 32]
 
@@ -39,10 +59,10 @@ section APBoot vstart=0x8000
     bts eax, 31
     mov cr0, eax
 
-    jmp (3 << 3):.__x64Mode
+    jmp (3 << 3):.__x64Mode + __BOOT_ADDR
 
 [bits 64]
 
 .__x64Mode:
 
-    jmp [0x7e20]
+    jmp [apBoot64 + __BOOT_ADDR]
