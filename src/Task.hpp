@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Task.h"
-#include "Bitmap.h"
 #include "Queue.h"
 #include "Memory.h"
 #include "HD.h"
@@ -84,18 +83,16 @@ uint64_t __getRFLAGS()
 
 void loadTaskPL0(void *RIP)
 {
-    uint8_t *taskMemPtr = (uint8_t *)allocateKernelPage(3);
+    uint8_t *taskMemPtr = (uint8_t *)allocateKernelPage(2);
 
-    TCB *tcbPtr         = (TCB *)taskMemPtr;
-    uint64_t vCR3       = (uint64_t)(taskMemPtr + 0x1000);
-    uint64_t pCR3       = *(uint64_t *)(0xffffff8000000000 | (vCR3 >> 12 << 3)) & 0xfffffffffffff000;
-    uint8_t *vBitmapBuf = taskMemPtr + 0x2000;
-    uint64_t *RSP0      = (uint64_t *)((uint64_t)tcbPtr + 0x1000 - 20 * 8);
+    TCB *tcbPtr    = (TCB *)taskMemPtr;
+    uint64_t vCR3  = (uint64_t)(taskMemPtr + 0x1000);
+    uint64_t pCR3  = *(uint64_t *)(0xffffff8000000000 | (vCR3 >> 12 << 3)) & 0xfffffffffffff000;
+    uint64_t *RSP0 = (uint64_t *)((uint64_t)tcbPtr + 0x1000 - 20 * 8);
 
     tcbPtr->__CR3       = pCR3;
     tcbPtr->__RSP0      = (uint64_t)RSP0;
     tcbPtr->__taskState = __TASK_READY;
-    bitmapInit(&tcbPtr->__vBitmap, vBitmapBuf, 0x8000);
 
     memcpy((void *)(vCR3 + 0x800), (void *)0xfffffffffffff800, 255 * 8);
     ((uint64_t *)vCR3)[511] = pCR3 | 0x3;
@@ -127,19 +124,17 @@ void loadTaskPL0(void *RIP)
 
 void loadTaskPL3(uint32_t startSector, uint8_t sectorCount)
 {
-    uint8_t *taskMemPtr = (uint8_t *)allocateKernelPage(3);
+    uint8_t *taskMemPtr = (uint8_t *)allocateKernelPage(2);
 
-    TCB *tcbPtr         = (TCB *)taskMemPtr;
-    uint64_t vCR3       = (uint64_t)(taskMemPtr + 0x1000);
-    uint64_t pCR3       = *(uint64_t *)(0xffffff8000000000 | (vCR3 >> 12 << 3)) & 0xfffffffffffff000;
-    uint8_t *vBitmapBuf = taskMemPtr + 0x2000;
-    uint64_t *RSP0      = (uint64_t *)((uint64_t)tcbPtr + 0x1000 - 20 * 8);
+    TCB *tcbPtr    = (TCB *)taskMemPtr;
+    uint64_t vCR3  = (uint64_t)(taskMemPtr + 0x1000);
+    uint64_t pCR3  = *(uint64_t *)(0xffffff8000000000 | (vCR3 >> 12 << 3)) & 0xfffffffffffff000;
+    uint64_t *RSP0 = (uint64_t *)((uint64_t)tcbPtr + 0x1000 - 20 * 8);
     uint64_t curCR3;
 
     tcbPtr->__CR3       = pCR3;
     tcbPtr->__RSP0      = (uint64_t)RSP0;
     tcbPtr->__taskState = __TASK_READY;
-    bitmapInit(&tcbPtr->__vBitmap, vBitmapBuf, 0x8000);
 
     memcpy((void *)(vCR3 + 0x800), (void *)0xfffffffffffff800, 255 * 8);
     ((uint64_t *)vCR3)[511] = pCR3 | 0x3;
@@ -169,7 +164,7 @@ void loadTaskPL3(uint32_t startSector, uint8_t sectorCount)
             uint64_t fileSize = *(uint64_t *)(phPtr + 0x20);
             uint64_t memSize  = *(uint64_t *)(phPtr + 0x28);
 
-            installTaskPage(&tcbPtr->__vBitmap, tarPtr, memSize);
+            installTaskPage(tarPtr, memSize);
             memcpy(tarPtr, srcPtr, fileSize);
         }
     }
@@ -195,7 +190,7 @@ void loadTaskPL3(uint32_t startSector, uint8_t sectorCount)
     RSP0[18] = 0x800000000000;
     RSP0[19] = (5 << 3) | 0x3;
 
-    installTaskPage(&tcbPtr->__vBitmap, (void *)(0x800000000000 - 0x1000), 0x1000);
+    installTaskPage((void *)(0x800000000000 - 0x1000), 0x1000);
 
     __asm__ __volatile__("mov %0, %%cr3":: "r"(curCR3));
 
@@ -250,7 +245,7 @@ TCB *getNextTask()
 
                 if (nextTask != curTask)
                 {
-                    deallocateKernelPage(nextTask, 3);
+                    deallocateKernelPage(nextTask, 2);
                     break;
                 }
 

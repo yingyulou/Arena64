@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Bitmap.h"
 #include "Util.h"
 
 #define __TASK_READY ((uint64_t)0x0)
@@ -13,7 +12,6 @@ typedef struct
     uint64_t __CR3;
     uint64_t __RSP0;
     uint64_t __taskState;
-    Bitmap __vBitmap;
     uint8_t __TSS[104];
     uint64_t __idleTask;
     uint64_t __RSP3;

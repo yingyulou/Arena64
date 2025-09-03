@@ -76,7 +76,7 @@ apBoot64:
     ltr ax
 
     mov ecx, 0xc0000101
-    lea rax, [r9 + 0x38]
+    lea rax, [r9 + 0x28]
     mov rdx, rax
     shr rdx, 32
     wrmsr

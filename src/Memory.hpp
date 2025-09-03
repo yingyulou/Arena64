@@ -69,7 +69,7 @@ void *allocateKernelPage(uint64_t pageCount)
 }
 
 
-void installTaskPage(Bitmap *memBitmap, void *startPtr, uint64_t memSize)
+void installTaskPage(void *startPtr, uint64_t memSize)
 {
     uint64_t startAddr = (uint64_t)startPtr;
     uint64_t endAddr   = (startAddr + memSize + 0x1000 - 0x1) & 0xfffffffffffff000;
@@ -77,15 +77,9 @@ void installTaskPage(Bitmap *memBitmap, void *startPtr, uint64_t memSize)
     startAddr &= 0xfffffffffffff000;
 
     uint64_t pageCount = (endAddr - startAddr) / 0x1000;
-    uint64_t startIdx  = startAddr / 0x1000;
 
     for (uint64_t pageIdx = 0; pageIdx < pageCount; pageIdx++)
     {
-        if (startIdx + pageIdx < memBitmap->__size)
-        {
-            bitmapSet(memBitmap, startIdx + pageIdx, 1);
-        }
-
         __installPage(startAddr + pageIdx * 0x1000, __allocateAddr(&__pBitmap, __P_START_ADDR, 1));
     }
 
