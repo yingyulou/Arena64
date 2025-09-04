@@ -54,36 +54,34 @@ void __installPage(uint64_t vAddr, uint64_t pAddr)
 }
 
 
-void *allocateKernelPage(uint64_t pageCount)
+void __installMemory(uint64_t startAddr, uint64_t pageCount)
 {
-    uint64_t vAddr = __allocateAddr(&__vBitmap, __V_START_ADDR, pageCount);
-
-    for (uint64_t pageIdx = 0; pageIdx < pageCount; pageIdx++)
-    {
-        __installPage(vAddr + pageIdx * 0x1000, __allocateAddr(&__pBitmap, __P_START_ADDR, 1));
-    }
-
-    memset((void *)vAddr, 0x0, pageCount * 0x1000);
-
-    return (void *)vAddr;
-}
-
-
-void installTaskPage(void *startPtr, uint64_t memSize)
-{
-    uint64_t startAddr = (uint64_t)startPtr;
-    uint64_t endAddr   = (startAddr + memSize + 0x1000 - 0x1) & 0xfffffffffffff000;
-
-    startAddr &= 0xfffffffffffff000;
-
-    uint64_t pageCount = (endAddr - startAddr) / 0x1000;
-
     for (uint64_t pageIdx = 0; pageIdx < pageCount; pageIdx++)
     {
         __installPage(startAddr + pageIdx * 0x1000, __allocateAddr(&__pBitmap, __P_START_ADDR, 1));
     }
 
     memset((void *)startAddr, 0x0, pageCount * 0x1000);
+}
+
+
+void *allocateKernelPage(uint64_t pageCount)
+{
+    uint64_t startAddr = __allocateAddr(&__vBitmap, __V_START_ADDR, pageCount);
+
+    __installMemory(startAddr, pageCount);
+
+    return (void *)startAddr;
+}
+
+
+void installTaskPage(void *startPtr, uint64_t memSize)
+{
+    uint64_t startAddr = (uint64_t)startPtr & 0xfffffffffffff000;
+    uint64_t endAddr   = ((uint64_t)startPtr + memSize + 0x1000 - 0x1) & 0xfffffffffffff000;
+    uint64_t pageCount = (endAddr - startAddr) / 0x1000;
+
+    __installMemory(startAddr, pageCount);
 }
 
 
