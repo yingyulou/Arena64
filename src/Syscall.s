@@ -42,7 +42,7 @@ syscallInit:
 
 syscallHandle:
 
-    mov [gs: 112], rsp
+    mov [gs: 104], rsp
     mov rsp, [gs: 4]
 
     push rcx
@@ -54,7 +54,7 @@ syscallHandle:
     pop r11
     pop rcx
 
-    mov rsp, [gs: 112]
+    mov rsp, [gs: 104]
 
     o64 sysret
 

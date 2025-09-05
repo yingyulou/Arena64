@@ -210,7 +210,7 @@ TCB *__getIdleTask()
 {
     TCB *idleTask = 0;
 
-    __asm__ __volatile__("mov %%gs:104, %0": "=g"(idleTask));
+    __asm__ __volatile__("mov %%gs:112, %0": "=g"(idleTask));
 
     return idleTask;
 }

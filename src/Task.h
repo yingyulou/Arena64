@@ -13,8 +13,8 @@ typedef struct
     uint64_t __RSP0;
     uint64_t __taskState;
     uint8_t __TSS[104];
-    uint64_t __idleTask;
     uint64_t __RSP3;
+    uint64_t __idleTask;
 } TCB;
 
 
