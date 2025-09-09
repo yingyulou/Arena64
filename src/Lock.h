@@ -2,12 +2,7 @@
 
 #include "Util.h"
 
-typedef struct
-{
-    uint64_t __lockFlag;
-    uint64_t __RFLAGS;
-} Lock;
-
+typedef uint64_t Lock;
 
 void lockInit(Lock *this);
 void lockAcquire(Lock *this);

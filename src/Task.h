@@ -18,8 +18,6 @@ typedef struct
 } TCB;
 
 
-extern uint8_t apStack[];
-
 void taskInit();
 void loadTaskPL0(void *RIP);
 void loadTaskPL3(uint32_t startSector, uint8_t sectorCount);
