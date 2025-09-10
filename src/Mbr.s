@@ -137,10 +137,10 @@ section Mbr
     cmp dword [rbx], 0x1
     jne .__notLoad
 
+    push rcx
     mov rsi, [rbx + 0x8]
     add rsi, 0x80000
     mov rdi, [rbx + 0x10]
-    push rcx
     mov rcx, [rbx + 0x20]
     rep movsb
     xor al, al
