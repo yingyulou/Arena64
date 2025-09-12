@@ -3,20 +3,19 @@
 #include "Bitmap.h"
 #include "Util.h"
 
-void bitmapInit(Bitmap *this, uint8_t *data, uint64_t size)
+void bitmapInit(Bitmap *this, uint8_t *data)
 {
     this->__data = data;
-    this->__size = size;
 }
 
 
-bool bitmapGet(Bitmap *this, uint64_t idx)
+bool __bitmapGet(Bitmap *this, uint64_t idx)
 {
     return (this->__data[idx >> 3] >> (idx & 0x7)) & 0x1;
 }
 
 
-void bitmapSet(Bitmap *this, uint64_t idx, bool val)
+void __bitmapSet(Bitmap *this, uint64_t idx, bool val)
 {
     if (val)
     {
@@ -37,7 +36,7 @@ uint64_t bitmapAllocate(Bitmap *this, uint64_t bitCount)
 
         for (uint64_t j = i; j < i + bitCount; j++)
         {
-            if (bitmapGet(this, j))
+            if (__bitmapGet(this, j))
             {
                 allocateBool = false;
                 break;
@@ -48,7 +47,7 @@ uint64_t bitmapAllocate(Bitmap *this, uint64_t bitCount)
         {
             for (uint64_t j = i; j < i + bitCount; j++)
             {
-                bitmapSet(this, j, 1);
+                __bitmapSet(this, j, 1);
             }
 
             return i;
@@ -61,6 +60,6 @@ void bitmapDeallocate(Bitmap *this, uint64_t startIdx, uint64_t bitCount)
 {
     for (uint64_t _ = 0; _ < bitCount; _++)
     {
-        bitmapSet(this, startIdx++, 0);
+        __bitmapSet(this, startIdx++, 0);
     }
 }
