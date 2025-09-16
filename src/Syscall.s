@@ -9,10 +9,6 @@ global syscallInit
 
 syscallInit:
 
-    push rax
-    push rcx
-    push rdx
-
     mov ecx, 0xc0000080
     rdmsr
     bts eax, 0
@@ -33,10 +29,6 @@ syscallInit:
     mov eax, 0x200
     xor edx, edx
     wrmsr
-
-    pop rdx
-    pop rcx
-    pop rax
 
     ret
 

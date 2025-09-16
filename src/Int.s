@@ -9,7 +9,6 @@ global __intList
 global __taskSwitch
 
 %macro intTmpl 1
-
 int%1:
 
     mov rdi, __intFmtStr
@@ -17,11 +16,9 @@ int%1:
     call printf
 
     hlt
-
 %endmacro
 
-intTimer:
-
+%macro pushaq 0
     push rax
     push rbx
     push rcx
@@ -37,6 +34,29 @@ intTimer:
     push r13
     push r14
     push r15
+%endmacro
+
+%macro popaq 0
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rbp
+    pop rdi
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rbx
+    pop rax
+%endmacro
+
+intTimer:
+
+    pushaq
 
     mov rax, 0xffff8000fee000b0
     mov dword [rax], 0x0
@@ -59,28 +79,13 @@ __taskSwitch:
     lea rbx, [rax + 0x1000]
     mov [gs: 4], rbx
 
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop r11
-    pop r10
-    pop r9
-    pop r8
-    pop rbp
-    pop rdi
-    pop rsi
-    pop rdx
-    pop rcx
-    pop rbx
-    pop rax
+    popaq
 
     iretq
 
 intKeyboard:
 
-    push rax
-    push rdi
+    pushaq
 
     mov rax, 0xffff8000fee000b0
     mov dword [rax], 0x0
@@ -89,8 +94,7 @@ intKeyboard:
     mov dil, al
     call keyboardDriver
 
-    pop rdi
-    pop rax
+    popaq
 
     iretq
 

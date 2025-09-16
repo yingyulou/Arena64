@@ -16,7 +16,7 @@ apBoot64:
 
 .__bootStart:
 
-    mov ax, __BOOT_SEG
+    mov ax, __AP_BOOT_SEG
     mov ds, ax
     mov es, ax
 
@@ -30,7 +30,7 @@ apBoot64:
     bts eax, 0
     mov cr0, eax
 
-    jmp dword (1 << 3):.__protectMode + __BOOT_ADDR
+    jmp dword (1 << 3):.__protectMode + __AP_BOOT_ADDR
 
 [bits 32]
 
@@ -59,10 +59,10 @@ apBoot64:
     bts eax, 31
     mov cr0, eax
 
-    jmp (3 << 3):.__x64Mode + __BOOT_ADDR
+    jmp (3 << 3):.__x64Mode + __AP_BOOT_ADDR
 
 [bits 64]
 
 .__x64Mode:
 
-    jmp [apBoot64 + __BOOT_ADDR]
+    jmp [apBoot64 + __AP_BOOT_ADDR]

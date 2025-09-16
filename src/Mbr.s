@@ -93,11 +93,11 @@ section Mbr
     mov rsp, 0xffff8000000a0000
 
     mov dx, 0x1f2
-    mov al, 96
+    mov al, 97
     out dx, al
 
     inc dx
-    mov al, 2
+    mov al, 1
     out dx, al
 
     inc dx
@@ -124,7 +124,7 @@ section Mbr
 
     mov dx, 0x1f0
     mov rdi, 0x80000
-    mov rcx, 96 * 512 / 2
+    mov rcx, 97 * 512 / 2
     rep insw
 
     mov rbx, [0x80020]

@@ -13,8 +13,8 @@ all:
 	ld -Ttext-segment 0x0 -z noexecstack -N -o Test Test.o Start.o
 	if [ ! -f Arena.img ]; then dd if=/dev/zero of=Arena.img count=20480; fi
 	dd if=Mbr of=Arena.img seek=0 conv=notrunc
-	dd if=APBoot of=Arena.img seek=1 conv=notrunc
-	dd if=Kernel of=Arena.img seek=2 conv=notrunc
+	dd if=Kernel of=Arena.img seek=1 conv=notrunc
+	dd if=APBoot of=Arena.img seek=97 conv=notrunc
 	dd if=Test of=Arena.img seek=1000 conv=notrunc
 
 clean:

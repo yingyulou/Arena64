@@ -14,9 +14,6 @@ lockRelease:
 
 lockAcquire:
 
-    push rax
-    push rdx
-
     mov rdx, 0x1
 
 .__tryLock:
@@ -24,8 +21,5 @@ lockAcquire:
     xor rax, rax
     lock cmpxchg [rdi], rdx
     jne .__tryLock
-
-    pop rdx
-    pop rax
 
     ret

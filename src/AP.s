@@ -13,40 +13,27 @@ __CPU_COUNT equ 4
 
 apInit:
 
-    push rdx
-    push rsi
-    push rdi
+    sgdt [abs __AP_BOOT_ADDR + 0x8]
+    sidt [abs __AP_BOOT_ADDR + 0x18]
+    mov rax, apBoot64
+    mov [abs __AP_BOOT_ADDR + 0x28], rax
 
-    mov rdi, __BOOT_ADDR
-    mov rsi, 1
-    mov rdx, 1
-    call hdRead
-
-    sgdt [abs __BOOT_ADDR + 0x8]
-    sidt [abs __BOOT_ADDR + 0x18]
-    mov rdx, apBoot64
-    mov [abs __BOOT_ADDR + 0x28], rdx
-
-    mov rdi, 0xffff8000fee00300
-    mov dword [rdi], 0x000c4500
+    mov rax, 0xffff8000fee00300
+    mov dword [rax], 0x000c4500
     db 0xeb, 0x0
-    mov dword [rdi], 0x000c4600 | (__BOOT_ADDR >> 12)
+    mov dword [rax], 0x000c4600 | (__AP_BOOT_ADDR >> 12)
 
 .__waitAP:
 
     cmp dword [apInitFlag], __CPU_COUNT
     jne .__waitAP
 
-    pop rdi
-    pop rsi
-    pop rdx
-
     ret
 
 apBoot64:
 
-    lgdt [abs __BOOT_ADDR + 0x8]
-    lidt [abs __BOOT_ADDR + 0x18]
+    lgdt [abs __AP_BOOT_ADDR + 0x8]
+    lidt [abs __AP_BOOT_ADDR + 0x18]
 
     mov r8, 0xffff8000fee00020
     mov r8d, [r8]
