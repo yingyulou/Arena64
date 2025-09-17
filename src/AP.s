@@ -46,17 +46,11 @@ apBoot64:
 
     lea rsp, [r9 + 0x1000]
 
-    mov rbx, 0xffff8000fee00000
-    bts dword [rbx + 0xf0], 8
-    mov dword [rbx + 0x320], 0x20020
-    mov dword [rbx + 0x3e0], 0xb
-    mov dword [rbx + 0x380], 0xffff
-
-    mov rbx, 0xffff8000fec00000
-    mov dword [rbx], 0x12
-    mov dword [rbx + 0x10], 0x21
-    mov dword [rbx], 0x13
-    mov dword [rbx + 0x10], 0x0
+    mov rax, 0xffff8000fee00000
+    bts dword [rax + 0xf0], 8
+    mov dword [rax + 0x320], 0x20020
+    mov dword [rax + 0x3e0], 0xb
+    mov dword [rax + 0x380], 0xffff
 
     lea rax, [r8 * 2 + 7]
     shl rax, 3
